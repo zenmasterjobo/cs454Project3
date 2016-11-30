@@ -6,6 +6,7 @@
 from sys import argv
 
 k = 0
+w = ""
 terminals = []
 nonterminals = []
 rules = {}
@@ -19,7 +20,14 @@ def processInput(filename):
         terminals = content.pop(0).split()
         for line in content:
             line_lst = line.split()
-            rules[line_lst.pop(0)] = line_lst
+            if line_lst != []:
+                key = line_lst.pop(0)
+                if key in rules:
+                    if line_lst == []:
+                        line_lst.append("")
+                    rules[key] += line_lst
+                else:
+                    rules[key] = line_lst
 
 def debug_print():
     print "-----------------------------"
@@ -39,29 +47,56 @@ def debug_print():
     print "-----------------------------"
 
 
-def derive (grammar, alpha, string, integer):
-# generates a derivation of the form
-# alpha =>alpha1 => alpha2 => … => alphaj-1 => w
- if(k == 1):
-     if(a rule alpha -> w exists in G):
-         return "alpha=>w", true
-      else:
-          return " ", false # the first output is irrelevant
-      sym = leftmost non-terminal in current;
-      for each rule R in G with sym on the left-side:
-          let R be sym -> beta;
-          next = replace(sym, beta, alpha)
-          der, found = derive(next, w, k-1)
-          if(found):
-            return “alpha=>next” + der, true
-          else:
-              return “”, false
+def leftmost_nonterminal(alpha):
+    for i, letter in enumerate(alpha):
+        if letter in nonterminals:
+            return letter, i
+    return None,None
+def replace_nonterminal(index, rule, alpha):
+    word = alpha[:index] + rule + alpha[index+1:]
+    return word
+
+def has_nonterminal(alpha): 
+    for letter in alpha:
+        if letter in nonterminals:
+            return True
+    return False
+
+def derive (alpha, k, der, found):
+    # generates a derivation of the form
+    # alpha =>alpha1 => alpha2 => ... => alphaj-1 => w
+    if k == 0:
+        if alpha == w:
+            return der, True
+        else:
+            return "", False
+    elif alpha == w:
+        return der, True
+    elif found == True:
+        return der, True
+    print alpha
+    index = 0
+    if has_nonterminal(alpha):
+        sym, index = leftmost_nonterminal(alpha)
+        rules_for_sym = []
+        rules_for_sym = rules[sym]
+        print rules_for_sym
+        for rule in rules_for_sym:
+            next_alpha = replace_nonterminal(index, rule, alpha)
+            derive(next_alpha, k-1, der + "%s => %s" % (alpha, next_alpha), found)
 
     
 def main():
+    global w
+    global k
     script, filename = argv
     processInput(filename)
     debug_print()
-
+    w = "abbaba"
+    #w = raw_input("What is w?: ")
+    der, found = derive("S", k, "", False) 
+    if not found:
+        print "Fucking better"
+    print "ouput: %s" % der
 if __name__ == "__main__":
     main()
