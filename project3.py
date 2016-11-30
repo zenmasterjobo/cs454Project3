@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # Jordan Bergero
 # Kevin Ting
+# Due December 6th
 
 import sys
 import rand
