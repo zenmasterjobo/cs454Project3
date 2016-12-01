@@ -65,22 +65,30 @@ def has_nonterminal(alpha):
 def derive (alpha, k, der, found):
     # generates a derivation of the form
     # alpha =>alpha1 => alpha2 => ... => alphaj-1 => w
-    if k == 0:
-        if alpha == w:
-            return der, True
-        else:
+    if k == 1:
+        next_alpha = ""
+        if has_nonterminal(alpha):
+            print alpha
+            sym, index = leftmost_nonterminal(alpha)
+            rules_for_sym = rules[sym]
+            for rule in rules_for_sym:
+                next_alpha = replace_nonterminal(index, rule, alpha)
+                if next_alpha == w:
+                    return der + "%s=>%s" % (ialpha, next_alpha), True
             return "", False
-    elif alpha == w:
-        return der, True
-    elif found == True:
-        return der, True
-    print alpha
+
+        else:
+            print alpha
+            if alpha != w:
+                return "", False
+            else:
+                print "found alpha"
+                return der + "%s=>%s" % (alpha, next_alpha), True
     index = 0
     if has_nonterminal(alpha):
         sym, index = leftmost_nonterminal(alpha)
         rules_for_sym = []
         rules_for_sym = rules[sym]
-        print rules_for_sym
         for rule in rules_for_sym:
             next_alpha = replace_nonterminal(index, rule, alpha)
             derive(next_alpha, k-1, der + "%s => %s" % (alpha, next_alpha), found)
